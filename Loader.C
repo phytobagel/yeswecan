@@ -85,13 +85,16 @@ Loader::Loader(int argc, char * argv[])
    //       << ": " << line << std::endl;
     
     
-    if (hasErrors(arr)) 
+ /*   if (hasErrors(arr)) 
         {
             std::cout << "Error on line " << std::dec << lineNumber
                       << ": " << arr << std::endl;
             return;
         }
-
+*/
+ // Notes
+ // use i x digit instead of is hex
+ //Easieest was
 
    //If control reaches here then no error was found and the program
    //was loaded into memory.
@@ -197,6 +200,9 @@ bool Loader::hasErrors(char line[])
 { 
 //    if (addrCheck(line) && dataCheck(line) &&
   //      spaceCheck(line) && colonCheck(line) &&
+//        v
+//        v
+//        v
 //        pipeCheck(line))
 //    {
 //        return false;
