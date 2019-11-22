@@ -62,12 +62,15 @@ Loader::Loader(int argc, char * argv[])
             Loader::loadline(arr);
         }
         
-        if (hasErrors(arr)) 
-            {
-              std::cout << "Error on line " << std::dec << lineNumber
-                        << ": " << arr << std::endl;
-              return;
-            }
+    if (hasErrors(arr)) 
+        {
+            std::cout << "Error on line " << std::dec << lineNumber
+                      << ": " << arr << std::endl;
+            loaded = false;
+            return;
+        }        
+
+        
         lineNumber++;
     
     }
@@ -89,8 +92,9 @@ Loader::Loader(int argc, char * argv[])
         {
             std::cout << "Error on line " << std::dec << lineNumber
                       << ": " << arr << std::endl;
+            loaded = false;
             return;
-        }
+        }        
 
 
    //If control reaches here then no error was found and the program
@@ -165,7 +169,7 @@ void Loader::loadline(char line[])
         
         mem->putByte(data, addr, error);                         //this method stores the data at the specified address
                                                                  //in data.
-        addr++;                                                  //address needs to be incremented
+        addr++;                          //address needs to be incremented
     }
 }    
     
@@ -194,17 +198,18 @@ int32_t Loader::convert(char line[], int32_t beg, int32_t end)
 //is self contained in a helper method.
 
 bool Loader::hasErrors(char line[])
-{ 
-//    if (addrCheck(line) && dataCheck(line) &&
-  //      spaceCheck(line) && colonCheck(line) &&
-//        pipeCheck(line))
-//    {
-//        return false;
-//    }
+{
+    if (addrCheck(line) && dataCheck(line) &&
+        spaceCheck(line) && colonCheck(line) &&
+        pipeCheck(line))
+    {
+        return false;
+    }
+ 
     return false;
 }
-
-
+ 
+ 
 //checking for correct address formatting?
 bool Loader::addrCheck(char line[])
 {
@@ -212,15 +217,15 @@ bool Loader::addrCheck(char line[])
     {
       return false; 
     }
-
-     for (int i = 2; i < 5; i++)
+ 
+     for (int i = 2; i < 4; i++)
         {
             if(!isHex(line[i]))
             {
             return false;
             }
         }
-
+        
     return true;
 }
 
@@ -268,7 +273,8 @@ bool Loader::colonCheck(char line[])
     if (line[5] != ':')
     {
         return false;
-        }
+    }
+    else    
         return true;
 }
 
@@ -283,10 +289,14 @@ bool Loader::pipeCheck(char line[])
 
 bool Loader::isHex(char ch)
 {
-     if(!((ch >= 48 && ch <= 57) || 
-          (ch >= 65 && ch <= 70) ||
-          (ch >= 97 && ch <= 102)))
-     return true;
+     if((ch >= '0' && ch <= '9') || 
+          (ch >= 'A' && ch <= 'F') ||
+          (ch >= 'a' && ch <= 'f'))
+     {
+        return true;
+     }
      else
-     return false;    
+     {
+        return false;    
+     }
 }
