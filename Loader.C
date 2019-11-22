@@ -74,33 +74,7 @@ Loader::Loader(int argc, char * argv[])
         lineNumber++;
     
     }
-
-   //Next, add a method that will write the data in the line to memory 
-   //(call that from within your loop)
-   
-    
-
-   //Finally, add code to check for errors in the input line.
-   //When your code finds an error, you need to print an error message and return.
-   //Since your output has to be identical to your instructor's, use this cout to print the
-   //error message.  Change the variable names if you use different ones.
-   //  std::cout << "Error on line " << std::dec << lineNumber
-   //       << ": " << line << std::endl;
-    
-    
-    if (hasErrors(arr)) 
-        {
-            std::cout << "Error on line " << std::dec << lineNumber
-                      << ": " << arr << std::endl;
-            loaded = false;
-            return;
-        }        
-
-
-   //If control reaches here then no error was found and the program
-   //was loaded into memory.
-   loaded = true;  
-  
+ 
 }
 
 /**
@@ -198,6 +172,7 @@ int32_t Loader::convert(char line[], int32_t beg, int32_t end)
 //is self contained in a helper method.
 
 bool Loader::hasErrors(char line[])
+<<<<<<< HEAD
 {
     if (addrCheck(line) && dataCheck(line) &&
         spaceCheck(line) && colonCheck(line) &&
@@ -206,6 +181,18 @@ bool Loader::hasErrors(char line[])
         return false;
     }
  
+=======
+{ 
+//    if (addrCheck(line) && dataCheck(line) &&
+  //      spaceCheck(line) && colonCheck(line) &&
+//        v
+//        v
+//        v
+//        pipeCheck(line))
+//    {
+//        return false;
+//    }
+>>>>>>> dc4ecaad2f1dee2ca00f071157fcd4aeb50e6723
     return false;
 }
  
