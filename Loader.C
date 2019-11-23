@@ -34,47 +34,29 @@
 Loader::Loader(int argc, char * argv[])
 {
    loaded = false;
-
-   //Start by writing a method that opens the file (checks whether it ends 
-   //with a .yo and whether the file successfully opens; if not, return without 
-   //loading)
-    
+   char arr[250];
+   int lineNumber = 1;
+      
    if (!Loader::canLoad(argv[1]))
    {
        return;
    }
-
-    
-
-   //The file handle is declared in Loader.h.  You should use that and
-   //not declare another one in this file.
    
-   //Next write a simple loop that reads the file line by line and prints it out
-   
-    char arr[250];
-    int lineNumber = 1;
-    while (inf.peek() != EOF)
-    {
+   while (inf.peek() != EOF)
+   {
         inf.getline(arr, 250);
-
-        if (arr[0] == '0' && arr[DATABEGIN] != ' ')
-        {
-            Loader::loadline(arr);
-        }
-        
-    if (hasErrors(arr)) 
-        {
-            std::cout << "Error on line " << std::dec << lineNumber
-                      << ": " << arr << std::endl;
-            loaded = false;
-            return;
-        }        
-
-        
+        if (hasErrors(arr)) 
+            {
+                std::cout << "Error on line " << std::dec << 
+                             lineNumber << ": " << arr << std::endl;
+                loaded = false;
+                return;
+            } 
+      
+        Loader::loadline(arr);
+        loaded = true;
         lineNumber++;
-    
-    }
- 
+   }
 }
 
 /**
@@ -101,7 +83,7 @@ bool Loader::isLoaded()
 bool Loader::canLoad(char inFile[])
 {
     int size = strlen(inFile);
-    
+
     if (!(inFile[size - 3] == '.' 
         && inFile[size - 2] == 'y'
         && inFile[size - 1] == 'o' ))
@@ -110,7 +92,6 @@ bool Loader::canLoad(char inFile[])
     }        
 
     inf.open(inFile, std::ifstream::in);
-
     if (!(inf.good()))
     {
         return false;
@@ -127,23 +108,15 @@ bool Loader::canLoad(char inFile[])
     
 void Loader::loadline(char line[])
 {   
-    Memory * mem = Memory::getInstance();              //This will either create a new memory object
-                                                       //or return an existing one.
-    
-    uint32_t addr = convert(line, ADDRBEGIN, ADDREND); //starting address for loading
-    
-    bool error = false;                                //for error checking
-    
-    //loops through the data segement, and loads it into memory
-    //byte by byte.
+    Memory * mem = Memory::getInstance();              
+    int32_t addr = convert(line, ADDRBEGIN, ADDREND);     
+    bool error = false;                                
      
-    for (int i = DATABEGIN; line[i] != ' '; i += 2)              //This for loop should loop through the data
-    {                                                            //to be stored and store it byte by byte.
-        int8_t data = Loader::convert(line, i, (i + 1));        //numeric data to store
-        
-        mem->putByte(data, addr, error);                         //this method stores the data at the specified address
-                                                                 //in data.
-        addr++;                          //address needs to be incremented
+    for (int i = DATABEGIN; line[i] != ' '; i += 2)              
+    {                                                            
+        int8_t data = Loader::convert(line, i, (i + 1));
+        mem->putByte(data, addr, error);                         
+        addr++;                          
     }
 }    
     
@@ -155,15 +128,15 @@ void Loader::loadline(char line[])
 int32_t Loader::convert(char line[], int32_t beg, int32_t end)
 {        
     int32_t j = 0;
-    char chrArray[4] = {0};
+    char chrArray[end - beg + 1];
     
     for (int i = beg; i <= end; i++, j++)
     {
-        chrArray[j  ] = line[i];      
+        chrArray[j] = line[i];      
     }
     
-    
-    return std::stoul(chrArray, NULL, 16);
+    std::string test = chrArray;
+    return std::stoul(test, NULL, 16);
 }
 
 //takes as input an individual line.  Method goes through several checks
@@ -172,106 +145,81 @@ int32_t Loader::convert(char line[], int32_t beg, int32_t end)
 //is self contained in a helper method.
 
 bool Loader::hasErrors(char line[])
-<<<<<<< HEAD
 {
-    if (addrCheck(line) && dataCheck(line) &&
-        spaceCheck(line) && colonCheck(line) &&
-        pipeCheck(line))
+    if(line[0] == '0' && line[7] == ' ')
     {
-        return false;
+        return positionlinecheck(line);
     }
- 
-=======
-{ 
-//    if (addrCheck(line) && dataCheck(line) &&
-  //      spaceCheck(line) && colonCheck(line) &&
-//        v
-//        v
-//        v
-//        pipeCheck(line))
-//    {
-//        return false;
-//    }
->>>>>>> dc4ecaad2f1dee2ca00f071157fcd4aeb50e6723
-    return false;
+    else if(line[0] == ' ')
+    {
+        return commentlinecheck(line);
+    }
+    else if(line[0] == '0' && line[7] != ' ')
+    {
+        return datalinecheck(line);
+    }
+
+    return 1;
 }
  
  
-//checking for correct address formatting?
-bool Loader::addrCheck(char line[])
+bool Loader::positionlinecheck(char line[])
 {
-    if (line[0] != '0' || line[1] != 'x')
-    {
-      return false; 
-    }
- 
-     for (int i = 2; i < 4; i++)
-        {
-            if(!isHex(line[i]))
-            {
-            return false;
-            }
-        }
-        
-    return true;
+    return 0;
 }
 
-//checking for correct data formatting!
-//characters must be valid hex, databegin must
-//be starting point, no spaces throughout until the
-//end.  Length must be an even number in between 2 and 20.
-bool Loader::dataCheck(char line[])
+bool Loader::commentlinecheck(char line[])
 {
-    int count = 0;
-    for(int i = DATABEGIN; line[i] != ' ';i++)
-    {
-        if(isHex(line[i]))
-        {
-            count++;
-        }
-    }
-
-    for(int i = count; line[i] != '|'; i++)
+    for (int i = 0; i <= 27; i++)
     {
         if(line[i] != ' ')
+            return 1;
+    }
+
+    if(line[28] != '|')
+        return 1;
+    else
+        return 0;
+}
+
+bool Loader::datalinecheck(char line[])
+{
+    if(line[0] != '0')
+        return 1;
+    if(line[1] != 'x')
+        return 1;
+    for (int i = 2; i <= 4; i++)
         {
-            return false;
+            if (!isHex(line[i]))
+                return 1;
         }
+    if(line[5] != ':')
+        return 1;
+    if(line[6] != ' ')
+        return 1;
+    
+    ///////////////////////////
+
+    int iter = 7;
+    while(line[iter] != ' ')
+    {
+        if (!isHex(line[iter]))
+        {
+            return 1;
+        }
+        iter++;    
     }
 
-    if (count % 2 == 0 && count >=2 && count <= 20)
+    for(;iter < 28; iter++)
     {
-        return true;
+        if(line[iter] != ' ')
+            return 1;
     }
-    return false;
-}
 
-bool Loader::spaceCheck(char line[])
-{
-    if (line[6] != ' ' && line[27] != ' ')
-    {
-    return false;
-    }
-    return true;
-}
+    if(line[28] != '|')
+        return 1;
+    else return 0;
 
-bool Loader::colonCheck(char line[])
-{
-    if (line[5] != ':')
-    {
-        return false;
-    }
-    else    
-        return true;
-}
-
-bool Loader::pipeCheck(char line[])
-{
-    if (line[28] != '|')
-    {
-        return false;
-    }
-    return true;
 }
 
 bool Loader::isHex(char ch)

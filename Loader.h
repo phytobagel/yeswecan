@@ -11,11 +11,9 @@ class Loader
       Loader(int argc, char * argv[]);
       bool isLoaded();
       bool hasErrors(char line[]);
-      bool addrCheck(char line[]);
-      bool dataCheck(char line[]);
-      bool spaceCheck(char line[]);
-      bool colonCheck(char line[]);
-      bool pipeCheck(char line[]);
       bool isHex(char ch);
+      bool positionlinecheck(char line[]);
+      bool commentlinecheck(char line[]);
+      bool datalinecheck(char line[]);
 
 };
