@@ -214,6 +214,9 @@ bool Loader::datalinecheck(char line[])
         iter++;    
     }
 
+    if(iter % 2 == 0)
+        return 1;
+
     for(;iter < 28; iter++)
     {
         if(line[iter] != ' ')
