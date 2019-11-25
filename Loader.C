@@ -41,10 +41,13 @@ Loader::Loader(int argc, char * argv[])
    {
        return;
    }
-   
+
    while (inf.peek() != EOF)
    {
         inf.getline(arr, 250);
+        
+
+
         if (hasErrors(arr)) 
             {
                 std::cout << "Error on line " << std::dec << 
@@ -53,13 +56,15 @@ Loader::Loader(int argc, char * argv[])
                 return;
             } 
    
-      
+         
         if(arr[DATABEGIN] != ' ' && arr[ADDRBEGIN] != ' ')
         Loader::loadline(arr);
         loaded = true;
         lineNumber++;
    }
 }
+
+
 
 /**
  * isLoaded
@@ -169,6 +174,11 @@ bool Loader::hasErrors(char line[])
  
 bool Loader::positionlinecheck(char line[])
 {
+    for(int i = DATABEGIN; i < 28; i++)
+    {
+        if(line[i] != ' ')
+            return 1;
+    }
     return 0;
 }
 
@@ -188,6 +198,8 @@ bool Loader::commentlinecheck(char line[])
 
 bool Loader::datalinecheck(char line[])
 {
+    static int lastAddress;
+
     if(line[0] != '0')
         return 1;
     if(line[1] != 'x')
@@ -205,6 +217,8 @@ bool Loader::datalinecheck(char line[])
     ///////////////////////////
 
     int iter = 7;
+    
+
     while(line[iter] != ' ')
     {
         if (!isHex(line[iter]))
@@ -225,7 +239,16 @@ bool Loader::datalinecheck(char line[])
 
     if(line[28] != '|')
         return 1;
-    else return 0;
+
+    int lineAddr = convert(line, 2, 4);
+    if(lineAddr < lastAddress) return 1;
+    lastAddress = lineAddr + countBytes(line) - 1;
+    return 0;
+
+}
+
+int countBytes(char line[])
+{
 
 }
 
