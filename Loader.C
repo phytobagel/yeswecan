@@ -52,7 +52,9 @@ Loader::Loader(int argc, char * argv[])
                 loaded = false;
                 return;
             } 
+   
       
+        if(arr[DATABEGIN] != ' ' && arr[ADDRBEGIN] != ' ')
         Loader::loadline(arr);
         loaded = true;
         lineNumber++;
@@ -111,6 +113,7 @@ void Loader::loadline(char line[])
     Memory * mem = Memory::getInstance();              
     int32_t addr = convert(line, ADDRBEGIN, ADDREND);     
     bool error = false;                                
+   
      
     for (int i = DATABEGIN; line[i] != ' '; i += 2)              
     {                                                            
@@ -128,13 +131,14 @@ void Loader::loadline(char line[])
 int32_t Loader::convert(char line[], int32_t beg, int32_t end)
 {        
     int32_t j = 0;
-    char chrArray[end - beg + 1];
+    char chrArray[end - beg + 2];
     
     for (int i = beg; i <= end; i++, j++)
     {
         chrArray[j] = line[i];      
     }
     
+    chrArray[j] = '\0';
     std::string test = chrArray;
     return std::stoul(test, NULL, 16);
 }
