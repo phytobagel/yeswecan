@@ -158,9 +158,9 @@ void FetchStage::getRegIds(uint64_t f_pc, uint64_t & rA, uint64_t & rB)
 {
     bool imem_error = false;
     Memory * mem = Memory::getInstance();
-    uint8_t byte = mem->getByte(f_pc, imem_error);
-    rA = (uint64_t) Tools::getBits(byte, 7, 4);
-    rB = (uint64_t) Tools::getBits(byte, 3, 0);
+    uint64_t byte = mem->getByte(f_pc, imem_error);
+    rA = (uint64_t) Tools::getBits(byte, 4, 7);
+    rB = (uint64_t) Tools::getBits(byte, 0, 3);
 }
 
 bool FetchStage::needValC(uint64_t f_icode)

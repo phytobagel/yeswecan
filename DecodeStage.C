@@ -31,27 +31,42 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    RegisterFile * reg = RegisterFile::getInstance();
    bool error = false;
 
-   uint64_t icode = dreg->geticode()->getOutput(), 
-            ifun = dreg->getifun()->getOutput(), 
-            valC = dreg->getvalC()->getOutput(), 
-            valA = 0, 
-            valB = 0;
-   uint64_t dstE = RNONE, dstM = RNONE, stat = SAOK, srcA = RNONE, srcB = RNONE;
+   uint64_t D_icode = dreg->geticode()->getOutput(), 
+            D_ifun = dreg->getifun()->getOutput(), 
+            D_valC = dreg->getvalC()->getOutput(), 
+            d_valA = 0, 
+            d_valB = 0,
+            D_valP = dreg->getvalP()->getOutput();
+   uint64_t d_dstE = RNONE, d_dstM = RNONE, 
+            D_stat = dreg->getstat()->getOutput(),
+            d_srcA = RNONE, d_srcB = RNONE;
 
-   srcA = getSrcA(icode,dreg->getrA()->getOutput());
-   //srcB = getSrcB();
-   //dstE = getDstE();
-   //dstM = getDstM();
-   valA = reg->readRegister(srcA,error);
-   valB = reg->readRegister(srcB,error);
-
-   //get d_srcA 2 calls to src Reg and fwd's
-
+   d_srcA = getSrcA(D_icode,dreg->getrA()->getOutput());
+   d_srcB = getSrcB(D_icode,dreg->getrB()->getOutput());
+   d_dstE = getDstE(D_icode,dreg->getrB()->getOutput());
+   d_dstM = getDstM(D_icode,dreg->getrA()->getOutput());
    
+   uint64_t d_rvalA = reg->readRegister(d_srcA,error);
+   uint64_t d_rvalB = reg->readRegister(d_srcB,error);
+
+   d_valA = selFwdA(D_icode, d_rvalA, D_valP, d_srcA);
+   d_valB = FwdB(d_rvalB, d_srcB);
 
    //provide the input values for the D register
-   setEInput(ereg, stat, icode, ifun, valC, valA, valB, dstE, dstM, srcA, srcB);
+   setEInput(ereg, D_stat, D_icode, D_ifun, D_valC, d_valA, 
+             d_valB, d_dstE, d_dstM, d_srcA, d_srcB);
    return false;
+}
+
+uint64_t DecodeStage::selFwdA(uint64_t icode, uint64_t rvalA,
+                              uint64_t valP, uint64_t srcA)
+{
+    return rvalA;
+}
+
+uint64_t DecodeStage::FwdB(uint64_t rvalB, uint64_t srcB)
+{
+    return rvalB;
 }
 
 /* doClockHigh

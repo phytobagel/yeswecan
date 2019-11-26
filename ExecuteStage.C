@@ -42,6 +42,8 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    //rA, rB, and valC to be set.
    //The lab assignment describes what methods need to be
    //written.
+   
+   valE = ereg->getvalC()->getOutput();
 
    //provide the input values for the D register
    setMInput(mreg, stat, icode, cnd, valE, valA, dstE, dstM);

@@ -28,19 +28,13 @@ bool WritebackStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     
     W * wreg = (W *) pregs[WREG];
     uint64_t icode = wreg->geticode()->getOutput(); 
-   
-   //code missing here to select the value of the PC
-   //and fetch the instruction from memory
-   //Fetching the instruction will allow the icode, ifun,
-   //rA, rB, and valC to be set.
-   //The lab assignment describes what methods need to be
-   //written.
-
-   if(icode == IHALT)
-   {
-   return true;
-   } //else
-   return false;
+    
+    
+    if(icode == IHALT)
+    {
+        return true;
+    } //else
+    return false;
 }
 
 /* doClockHigh
@@ -51,6 +45,22 @@ bool WritebackStage::doClockLow(PipeReg ** pregs, Stage ** stages)
  */
 void WritebackStage::doClockHigh(PipeReg ** pregs)
 {
-   
+   W * wreg = (W *) pregs[WREG];
+   RegisterFile * reg = RegisterFile::getInstance();
+   bool error = false;   
+       
+   //code missing here to select the value of the PC
+   //and fetch the instruction from memory
+   //Fetching the instruction will allow the icode, ifun,
+   //rA, rB, and valC to be set.
+   //The lab assignment describes what methods need to be
+   //written.
+
+   uint64_t W_valE = wreg->getvalE()->getOutput();
+   uint64_t W_dstE = wreg->getdstE()->getOutput(); 
+    
+   reg->RegisterFile::writeRegister(W_valE, W_dstE, error);
+
+  
 }
 
