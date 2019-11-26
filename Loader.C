@@ -155,7 +155,7 @@ int32_t Loader::convert(char line[], int32_t beg, int32_t end)
 
 bool Loader::hasErrors(char line[])
 {
-    if(line[0] == '0' && line[7] == ' ')
+    if(line[0] == '0' && line[1] == 'x' && line[7] == ' ')
     {
         return positionlinecheck(line);
     }
@@ -241,15 +241,25 @@ bool Loader::datalinecheck(char line[])
         return 1;
 
     int lineAddr = convert(line, 2, 4);
+
+    
     if(lineAddr < lastAddress) return 1;
     lastAddress = lineAddr + countBytes(line) - 1;
+    
+    if(lastAddress < 0 || lastAddress >= MEMSIZE) return 1;
+
     return 0;
 
 }
 
-int countBytes(char line[])
+int Loader::countBytes(char line[])
 {
-
+    int count = 0;
+    for (int i = DATABEGIN; line[i] != ' '; i++)
+    {
+        count++;
+    }
+    return count / 2;
 }
 
 bool Loader::isHex(char ch)

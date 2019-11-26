@@ -10,8 +10,8 @@ class Loader
       bool canLoad(char inFile[]);
       Loader(int argc, char * argv[]);
       bool isLoaded();
-      bool makeAddressArray(char * file[]);
-      bool hasErrors(char line[], bool hasOrderIssues);
+      bool hasErrors(char line[]);
+      int countBytes(char line[]);
       bool isHex(char ch);
       bool positionlinecheck(char line[]);
       bool commentlinecheck(char line[]);
