@@ -7,11 +7,11 @@ class DecodeStage: public Stage
                      uint64_t valC, uint64_t valA, uint64_t valB,
                      uint64_t dstE, uint64_t dstM, uint64_t srcA,
                      uint64_t srcB);
-       uint64_t setSrcA(uint64_t D_icode, uint64_t D_rA);
+      uint64_t getSrcA(uint64_t D_icode, uint64_t D_rA);
 
-      uint64_t setSrcB(uint64_t D_icode, uint64_t D_rB);
-      uint64_t setDstE(uint64_t D_icode, uint64_t D_rB);
-      uint64_t setDstM(uint64_t D_icode, uint64_t D_rA);
+      uint64_t getSrcB(uint64_t D_icode, uint64_t D_rB);
+      uint64_t getDstE(uint64_t D_icode, uint64_t D_rB);
+      uint64_t getDstM(uint64_t D_icode, uint64_t D_rA);
 
 
    public:

@@ -52,15 +52,15 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    bool needValC = FetchStage::needValC(icode);
    bool needRegIds = FetchStage::needRegIds(icode);
    
-   uint64_t start = f_pc + 1;
+   uint64_t startAddress = f_pc + 1;
    if (needRegIds)
    {   
-       getRegIds(start, rA, rB);
-       start++;
+       getRegIds(startAddress, rA, rB);
+       startAddress++;
    }
    if (needValC)
    {
-       getValC(start);
+       valC = getValC(startAddress);
    }
    
    valP = PCIncrement(needValC, needRegIds, valP, f_pc);
@@ -203,7 +203,7 @@ uint64_t FetchStage::predictPC(uint64_t ValP, uint64_t ValC, uint64_t icode)
     return ValP; 
 }
 
-uint64_t FetchStage:: PCIncrement(bool needValC, bool needRegIds, uint64_t & valP, uint64_t f_pc)
+uint64_t FetchStage::PCIncrement(bool needValC, bool needRegIds, uint64_t & valP, uint64_t f_pc)
 {
    if (needRegIds)
     {

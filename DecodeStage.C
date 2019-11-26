@@ -28,6 +28,9 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
    D * dreg = (D *) pregs[DREG];
    E * ereg = (E *) pregs[EREG];
+   RegisterFile * reg = RegisterFile::getInstance();
+   bool error = false;
+
    uint64_t icode = dreg->geticode()->getOutput(), 
             ifun = dreg->getifun()->getOutput(), 
             valC = dreg->getvalC()->getOutput(), 
@@ -35,14 +38,15 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
             valB = 0;
    uint64_t dstE = RNONE, dstM = RNONE, stat = SAOK, srcA = RNONE, srcB = RNONE;
 
-   //code missing here to select the value of the PC
-   //and fetch the instruction from memory
-   //Fetching the instruction will allow the icode, ifun,
-   //rA, rB, and valC to be set.
-   //The lab assignment describes what methods need to be
-   //written.
+   srcA = getSrcA(icode,dreg->getrA()->getOutput());
+   //srcB = getSrcB();
+   //dstE = getDstE();
+   //dstM = getDstM();
+   valA = reg->readRegister(srcA,error);
+   valB = reg->readRegister(srcB,error);
 
-   //The value passed to setInput below will need to be changed
+   //get d_srcA 2 calls to src Reg and fwd's
+
    
 
    //provide the input values for the D register
@@ -109,22 +113,22 @@ void DecodeStage::setEInput(E * ereg, uint64_t stat, uint64_t icode,
  * @param D_icode
  * @param 
  */
- uint64_t DecodeStage::setSrcA(uint64_t D_icode, uint64_t D_rA)
+ uint64_t DecodeStage::getSrcA(uint64_t D_icode, uint64_t D_rA)
  {
-     //if D_icode == IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ then return D_rA
      if(D_icode == IRRMOVQ ||
         D_icode == IRMMOVQ ||
-        D_icode == IOPQ ||
+        D_icode == IOPQ    ||
         D_icode == IPUSHQ)
-       {
-           return D_rA;
-       }//if D_icode == IPOPQ, IRET then return RSP
-       else if(D_icode == IOPQ ||
-               D_icode == IRET)
-       {
-            return RSP;
-       }
-       return RNONE;
+     {
+        return D_rA;
+     }
+     else if(D_icode == IOPQ ||
+             D_icode == IRET)
+     {
+        return RSP;
+     }
+     
+     return RNONE;
  }
 
 /* setSrcB
@@ -133,26 +137,23 @@ void DecodeStage::setEInput(E * ereg, uint64_t stat, uint64_t icode,
  *
  * @param D_icode
  */
-uint64_t DecodeStage::setSrcB(uint64_t D_icode, uint64_t D_rB)
+uint64_t DecodeStage::getSrcB(uint64_t D_icode, uint64_t D_rB)
 {
-    //if D_icode == IOPQ, IRMMOVQ, IMRMOVQ then return D_rB
-    if(D_icode == IOPQ ||
+    if(D_icode == IOPQ    ||
        D_icode == IRMMOVQ ||
        D_icode == IMRMOVQ)
     {
         return D_rB;
-    }//if D_icode == IPUSHQ, IPOPQ, ICALL, IRET then return RSP
+    }
     else if (D_icode == IPUSHQ ||
-             D_icode == IPOPQ ||
-             D_icode == ICALL ||
+             D_icode == IPOPQ  ||
+             D_icode == ICALL  ||
              D_icode == IRET)
     {
         return RSP;
     }
-    else
-    {
-        return RNONE;
-    }
+    
+    return RNONE;
 }
 
 /*setDstE
@@ -160,7 +161,7 @@ uint64_t DecodeStage::setSrcB(uint64_t D_icode, uint64_t D_rB)
  *
  * @param D_icode
  */
-uint64_t DecodeStage::setDstE(uint64_t D_icode, uint64_t D_rB)
+uint64_t DecodeStage::getDstE(uint64_t D_icode, uint64_t D_rB)
 {
     if(D_icode == IRRMOVQ ||
        D_icode == IIRMOVQ ||
@@ -169,33 +170,28 @@ uint64_t DecodeStage::setDstE(uint64_t D_icode, uint64_t D_rB)
         return D_rB;
     }
     else if(D_icode == IPUSHQ ||
-            D_icode == IPOPQ ||
-            D_icode == ICALL ||
+            D_icode == IPOPQ  ||
+            D_icode == ICALL  ||
             D_icode == IRET)
     {
         return RSP;
     }
-    else
-    {
-        return RNONE;
-    }
+    
+    return RNONE;
 }
 
 /*setDstM
  *sets dstM if D_icode is IMRMOVQ, IPOPQ then returns D_rA
  *
  */
-uint64_t DecodeStage::setDstM(uint64_t D_icode, uint64_t D_rA)
+uint64_t DecodeStage::getDstM(uint64_t D_icode, uint64_t D_rA)
 {
     if (D_icode == IMRMOVQ ||
         D_icode == IPOPQ)
     {
         return D_rA;
     }
-    else
-    {
-        return RNONE;
-    }
+    
+    return RNONE;
 }
-
 
