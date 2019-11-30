@@ -14,6 +14,7 @@
 #include "Debug.h"
 #include "Instructions.h"
 #include "ConditionCodes.h"
+#include "Tools.h"
 
 /*
  * doClockLow:
@@ -29,7 +30,7 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    E * ereg = (E *) pregs[EREG];
    M * mreg = (M *) pregs[MREG];
    uint64_t icode = ereg->geticode()->getOutput(), 
-            cnd = 0, 
+           cnd = 0, 
             valE = 0,
             valA = ereg->getvalA()->getOutput();
    
@@ -122,14 +123,23 @@ uint64_t ExecuteStage::e_dstE(uint64_t E_icode, bool e_Cnd, uint64_t E_dstE)
     return E_dstE;
 }
 
-uint64_t ExecuteStage::CC(bool set_cc, uint64_t ALUoutput)
+uint64_t ExecuteStage::CC(bool set_cc, uint64_t ALUoutput, uint64_t ALU_A, uint64_t ALU_B)
 {
     if (!set_cc) return false;
 
     ConditionCodes * cond = ConditionCodes::getInstance();
     bool error = false;
 
-    if (ALUoutput < 0) cond->setConditionCode(1, SF, error);
+    if ((Tools::sign(ALUoutput) == 0 || ALUoutput == 0) &&
+        Tools::sign(ALU_A) == 1 && Tools::sign(ALU_B) == 1)
+        cond->setConditionCode(1, OF, error);
+    
+    if ((Tools::sign(ALUoutput) == 1 || ALUoutput == 0) &&
+        Tools::sign(ALU_A) == 0 && Tools::sign(ALU_B) == 0)
+        cond->setConditionCode(1, OF, error);
+
+    if (Tools::sign(ALUoutput) == 1) cond->setConditionCode(1, SF, error);
+    if (ALUoutput == 0) cond->setConditionCode(1, ZF, error);
 
     return true;
 }
