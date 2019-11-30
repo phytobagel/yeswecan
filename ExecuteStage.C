@@ -12,7 +12,7 @@
 #include "ExecuteStage.h"
 #include "Status.h"
 #include "Debug.h"
-
+#include "Instructions.h"
 
 /*
  * doClockLow:
@@ -49,6 +49,83 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    setMInput(mreg, stat, icode, cnd, valE, valA, dstE, dstM);
    return false;
 }
+
+uint64_t ExecuteStage::aluA(uint64_t E_icode, uint64_t E_valA, uint64_t E_valC)
+{
+    if (E_icode == IRRMOVQ ||
+        E_icode == IOPQ)
+    {
+        return E_valA;
+    }
+    else if (E_icode == IIRMOVQ ||
+             E_icode == IRMMOVQ ||
+             E_icode == IMRMOVQ)
+    {
+        return E_valC;
+    }
+    else if (E_icode == ICALL ||
+             E_icode == IPUSHQ)
+    {
+        return -8;
+    }
+    else if (E_icode == IRET ||
+             E_icode == IPOPQ)
+    {
+        return 8;
+    }
+
+    return 0;
+}
+
+uint64_t ExecuteStage::aluB(uint64_t E_icode, uint64_t E_valB)
+{
+    if (E_icode == IRMMOVQ ||
+        E_icode == IMRMOVQ ||
+        E_icode == IOPQ    ||
+        E_icode == ICALL   ||
+        E_icode == IPUSHQ  ||
+        E_icode == IRET    ||
+        E_icode == IPOPQ)
+    {
+        return E_valB;
+    }
+    else if (E_icode == IRRMOVQ ||
+             E_icode == IIRMOVQ)
+    {
+        return 0;
+    }
+
+    return 0;
+}
+
+uint64_t ExecuteStage::alufun(uint64_t E_icode, uint64_t E_ifun)
+{
+    if (E_icode == IOPQ) return E_ifun;
+    return ADDQ;
+}
+
+bool ExecuteStage::set_cc(uint64_t E_icode)
+{
+    if (E_icode == IOPQ) return true;
+    return false;
+}
+
+uint64_t ExecuteStage::e_dstE(uint64_t E_icode, bool e_Cnd, uint64_t E_dstE)
+{
+    if (E_icode == IRRMOVQ && !e_Cnd) return RNONE;
+    return E_dstE;
+}
+
+uint64_t ExecuteStage::CC(bool set_cc, uint64_t ALUoutput)
+{
+    if (!set_cc) return 0;
+
+    ConditionCodes * cond = ConditionCodes::getInstance();
+    bool error = false;
+
+    if (ALUoutput < 0) cond->setCoonditionCode(1, SF, error);
+}
+
 
 /* doClockHigh
  * applies the appropriate control signal to the F
