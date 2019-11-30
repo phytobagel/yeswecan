@@ -29,32 +29,40 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
    E * ereg = (E *) pregs[EREG];
    M * mreg = (M *) pregs[MREG];
-   uint64_t icode = ereg->geticode()->getOutput(), 
-           cnd = 0, 
-            valE = 0,
-            valA = ereg->getvalA()->getOutput();
-   
-   uint64_t dstE = ereg->getdstE()->getOutput(), 
-            dstM = ereg->getdstM()->getOutput(), 
-            stat = SAOK;
+   uint64_t E_icode = ereg->geticode()->getOutput(), 
+            E_ifun = ereg->getifun()->getOutput(),
+            e_Cnd = 0, 
+            E_valA = ereg->getvalA()->getOutput(),
+            E_valB = ereg->getvalB()->getOutput(),
+            E_valC = ereg->getvalC()->getOutput(),
+            E_dstE = ereg->getdstE()->getOutput(), 
+            E_dstM = ereg->getdstM()->getOutput(), 
+            E_stat = SAOK;
 
-   //code missing here to select the value of the PC
-   //and fetch the instruction from memory
-   //Fetching the instruction will allow the icode, ifun,
-   //rA, rB, and valC to be set.
-   //The lab assignment describes what methods need to be
-   //written.
-   
-   valE = ereg->getvalC()->getOutput();
 
-   //provide the input values for the D register
-   setMInput(mreg, stat, icode, cnd, valE, valA, dstE, dstM);
+   uint64_t ALU_A = aluA(E_icode, E_valA, E_valC);
+   uint64_t ALU_B = aluB(E_icode, E_valB);
+   uint64_t ALU_fun = E_ifun;
+   
+   uint64_t ALUoutput = ALU(ALU_A, ALU_B, ALU_fun);
+   uint64_t e_dstE = E_dstE;
+
+   setMInput(mreg, E_stat, E_icode, e_Cnd, ALUoutput, E_valA, e_dstE, E_dstM);
    return false;
 }
 
 uint64_t ExecuteStage::ALU(uint64_t ALU_A, uint64_t ALU_B, uint64_t ALU_fun)
 {
-    return 0;
+    if (ALU_fun == 0)
+        return ALU_A + ALU_B;
+    else if (ALU_fun == 1)
+        return ALU_B - ALU_A;
+    else if (ALU_fun == 2)
+        return ALU_A & ALU_B;
+    else if (ALU_fun == 3)
+        return ALU_A ^ ALU_B;
+
+    return -1;
 }
 
 uint64_t ExecuteStage::aluA(uint64_t E_icode, uint64_t E_valA, uint64_t E_valC)
