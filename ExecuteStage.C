@@ -13,6 +13,7 @@
 #include "Status.h"
 #include "Debug.h"
 #include "Instructions.h"
+#include "ConditionCodes.h"
 
 /*
  * doClockLow:
@@ -48,6 +49,11 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    //provide the input values for the D register
    setMInput(mreg, stat, icode, cnd, valE, valA, dstE, dstM);
    return false;
+}
+
+uint64_t ExecuteStage::ALU(uint64_t ALU_A, uint64_t ALU_B, uint64_t ALU_fun)
+{
+    return 0;
 }
 
 uint64_t ExecuteStage::aluA(uint64_t E_icode, uint64_t E_valA, uint64_t E_valC)
@@ -118,12 +124,14 @@ uint64_t ExecuteStage::e_dstE(uint64_t E_icode, bool e_Cnd, uint64_t E_dstE)
 
 uint64_t ExecuteStage::CC(bool set_cc, uint64_t ALUoutput)
 {
-    if (!set_cc) return 0;
+    if (!set_cc) return false;
 
     ConditionCodes * cond = ConditionCodes::getInstance();
     bool error = false;
 
-    if (ALUoutput < 0) cond->setCoonditionCode(1, SF, error);
+    if (ALUoutput < 0) cond->setConditionCode(1, SF, error);
+
+    return true;
 }
 
 

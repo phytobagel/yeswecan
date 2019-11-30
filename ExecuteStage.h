@@ -12,6 +12,7 @@ class ExecuteStage: public Stage
       bool set_cc(uint64_t E_icode);
       uint64_t e_dstE(uint64_t E_icode, bool e_Cnd, uint64_t E_dstE);
       uint64_t CC(bool set_cc, uint64_t ALUoutput);
+      uint64_t ALU(uint64_t ALU_A, uint64_t ALU_B, uint64_t ALU_fun);
 
 
    public:
