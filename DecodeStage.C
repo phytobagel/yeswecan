@@ -13,7 +13,7 @@
 #include "DecodeStage.h"
 #include "Status.h"
 #include "Debug.h"
-
+#include "ExecuteStage.h"
 
 /*
  * doClockLow:
@@ -26,6 +26,8 @@
  */
 bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
+   W * wreg = (W *) pregs[WREG];
+   M * mreg = (M *) pregs[MREG];
    D * dreg = (D *) pregs[DREG];
    E * ereg = (E *) pregs[EREG];
    RegisterFile * reg = RegisterFile::getInstance();
@@ -49,8 +51,8 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    uint64_t d_rvalA = reg->readRegister(d_srcA,error);
    uint64_t d_rvalB = reg->readRegister(d_srcB,error);
 
-   d_valA = selFwdA(D_icode, d_rvalA, D_valP, d_srcA);
-   d_valB = FwdB(d_rvalB, d_srcB);
+   d_valA = selFwdA(d_srcA, mreg, ereg, wreg, stages, d_rvalA);
+   d_valB = FwdB(d_srcB, mreg, wreg, ereg, stages, d_rvalB);
 
    //provide the input values for the D register
    setEInput(ereg, D_stat, D_icode, D_ifun, D_valC, d_valA, 
@@ -58,15 +60,37 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    return false;
 }
 
-uint64_t DecodeStage::selFwdA(uint64_t icode, uint64_t rvalA,
-                              uint64_t valP, uint64_t srcA)
+uint64_t DecodeStage::selFwdA(uint64_t d_srcA, M * mreg, E * ereg, W * wreg, Stage ** stages, uint64_t d_rvalA) 
 {
-    return rvalA;
+    ExecuteStage * eStage = (ExecuteStage *) stages[ESTAGE];
+
+
+    if (d_srcA == eStage->gete_dstE())
+        return eStage->gete_valE();
+
+    if (d_srcA == mreg->getdstE()->getOutput())
+        return mreg->getvalE()->getOutput();
+
+    if (d_srcA == wreg->getdstE()->getOutput())
+        return wreg->getvalE()->getOutput();
+
+    return d_rvalA;
 }
 
-uint64_t DecodeStage::FwdB(uint64_t rvalB, uint64_t srcB)
+uint64_t DecodeStage::FwdB(uint64_t d_srcB, M * mreg, W * wreg, E * ereg, Stage ** stages, uint64_t d_rvalB )
 {
-    return rvalB;
+    ExecuteStage * eStage = (ExecuteStage *) stages[ESTAGE];
+
+    if (d_srcB == eStage->gete_dstE())
+        return eStage->gete_valE();
+
+    if (d_srcB == mreg->getdstE()->getOutput())
+        return mreg->getvalE()->getOutput();
+
+    if (d_srcB == wreg->getdstE()->getOutput())
+        return wreg->getvalE()->getOutput();
+
+    return d_rvalB;
 }
 
 /* doClockHigh

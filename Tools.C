@@ -307,20 +307,11 @@ uint8_t Tools::sign(uint64_t source)
                                                                               //will be less than op1 and op2.  Will it always be 0?  I don't know but ill assume it uses the leftover                  
 bool Tools::addOverflow(uint64_t op1, uint64_t op2)
 {
-   uint64_t large;
-   
-   
-   if (op1 > op2)
-    {
-      large = op1;
-      
-    }
-    else
-    {
-        large = op2;
-            }
 
-   uint8_t sign1 = sign(large);
+   if(sign(op1) != sign(op2))
+       return false;
+
+   uint8_t sign1 = sign(op1);
    
    uint8_t signSum = sign(op1 + op2);
 

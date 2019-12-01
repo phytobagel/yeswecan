@@ -42,27 +42,60 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
    uint64_t ALU_A = aluA(E_icode, E_valA, E_valC);
    uint64_t ALU_B = aluB(E_icode, E_valB);
-   uint64_t ALU_fun = E_ifun;
+   uint64_t ALU_fun = alufun(E_icode, E_ifun);
    
-   uint64_t ALUoutput = ALU(ALU_A, ALU_B, ALU_fun);
-   uint64_t e_dstE = E_dstE;
+   e_dstE_var = E_dstE;
+   
+   bool set_cc = ExecuteStage::set_cc(E_icode);
+   
+   uint64_t ALUoutput = ALU(ALU_A, ALU_B, ALU_fun, set_cc);
+   
+   e_valE_var = ALUoutput;
 
-   setMInput(mreg, E_stat, E_icode, e_Cnd, ALUoutput, E_valA, e_dstE, E_dstM);
+   setMInput(mreg, E_stat, E_icode, e_Cnd, ALUoutput, E_valA, e_dstE_var, E_dstM);
    return false;
+}  
+   
+uint64_t ExecuteStage::gete_dstE()
+{  
+    return e_dstE_var;
+}  
+   
+uint64_t ExecuteStage::gete_valE()
+{
+    return e_valE_var;
 }
 
-uint64_t ExecuteStage::ALU(uint64_t ALU_A, uint64_t ALU_B, uint64_t ALU_fun)
+uint64_t ExecuteStage::ALU(uint64_t ALU_A, uint64_t ALU_B, uint64_t ALU_fun, bool set_cc)
 {
-    if (ALU_fun == 0)
-        return ALU_A + ALU_B;
-    else if (ALU_fun == 1)
-        return ALU_B - ALU_A;
-    else if (ALU_fun == 2)
-        return ALU_A & ALU_B;
-    else if (ALU_fun == 3)
-        return ALU_A ^ ALU_B;
+    uint64_t result = 0;
+    bool overflow = false;
 
-    return -1;
+    if (ALU_fun == ADDQ)
+    {
+        result = ALU_A + ALU_B;
+        overflow = Tools::addOverflow(ALU_A, ALU_B);
+    }
+    else if (ALU_fun == SUBQ)
+    {
+        result = ALU_B - ALU_A;
+        overflow = Tools::subOverflow(ALU_B, ALU_A);
+    }
+    else if (ALU_fun == ANDQ)
+    {
+        result = ALU_A & ALU_B;
+        overflow = 0;
+    }
+    else if (ALU_fun == XORQ)
+    {
+        result = ALU_A ^ ALU_B;
+        overflow = 0;
+    }
+
+    if(set_cc)
+        ExecuteStage::CC(result, overflow);
+
+    return result;
 }
 
 uint64_t ExecuteStage::aluA(uint64_t E_icode, uint64_t E_valA, uint64_t E_valC)
@@ -121,8 +154,7 @@ uint64_t ExecuteStage::alufun(uint64_t E_icode, uint64_t E_ifun)
 
 bool ExecuteStage::set_cc(uint64_t E_icode)
 {
-    if (E_icode == IOPQ) return true;
-    return false;
+    return (E_icode == IOPQ);
 }
 
 uint64_t ExecuteStage::e_dstE(uint64_t E_icode, bool e_Cnd, uint64_t E_dstE)
@@ -131,25 +163,21 @@ uint64_t ExecuteStage::e_dstE(uint64_t E_icode, bool e_Cnd, uint64_t E_dstE)
     return E_dstE;
 }
 
-uint64_t ExecuteStage::CC(bool set_cc, uint64_t ALUoutput, uint64_t ALU_A, uint64_t ALU_B)
+void ExecuteStage::CC(uint64_t ALUoutput, bool overflow)
 {
-    if (!set_cc) return false;
 
     ConditionCodes * cond = ConditionCodes::getInstance();
     bool error = false;
 
-    if ((Tools::sign(ALUoutput) == 0 || ALUoutput == 0) &&
-        Tools::sign(ALU_A) == 1 && Tools::sign(ALU_B) == 1)
-        cond->setConditionCode(1, OF, error);
-    
-    if ((Tools::sign(ALUoutput) == 1 || ALUoutput == 0) &&
-        Tools::sign(ALU_A) == 0 && Tools::sign(ALU_B) == 0)
-        cond->setConditionCode(1, OF, error);
+    cond->setConditionCode(overflow, OF, error); 
 
-    if (Tools::sign(ALUoutput) == 1) cond->setConditionCode(1, SF, error);
-    if (ALUoutput == 0) cond->setConditionCode(1, ZF, error);
+    cond->setConditionCode(Tools::sign(ALUoutput), SF, error);
 
-    return true;
+    if(ALUoutput == 0)
+        cond->setConditionCode(1, ZF, error);
+    else
+        cond->setConditionCode(0, ZF, error);
+
 }
 
 
