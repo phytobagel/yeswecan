@@ -44,17 +44,51 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    uint64_t ALU_B = aluB(E_icode, E_valB);
    uint64_t ALU_fun = alufun(E_icode, E_ifun);
    
-   e_dstE_var = E_dstE;
-   
    bool set_cc = ExecuteStage::set_cc(E_icode);
    
    uint64_t ALUoutput = ALU(ALU_A, ALU_B, ALU_fun, set_cc);
    
    e_valE_var = ALUoutput;
 
+   e_Cnd = cond(E_icode, E_ifun);
+
+   e_dstE_var = e_dstE(E_icode, e_Cnd, E_dstE);
+
    setMInput(mreg, E_stat, E_icode, e_Cnd, ALUoutput, E_valA, e_dstE_var, E_dstM);
    return false;
-}  
+} 
+
+uint64_t ExecuteStage::cond(uint64_t E_icode, uint64_t E_ifun)
+{
+    ConditionCodes * cond = cond->getInstance();
+    bool error = false;
+    uint64_t sf = cond->getConditionCode(SF, error);
+    uint64_t of = cond->getConditionCode(OF, error);
+    uint64_t zf = cond->getConditionCode(ZF, error); 
+    
+    if ((E_icode == IJXX && E_ifun == UNCOND) || 
+        (E_icode == IRRMOVQ && E_ifun == UNCOND)) return 1;
+
+    if ((E_icode == IJXX && E_ifun == LESSEQ) || 
+        (E_icode == IRRMOVQ && E_ifun == LESSEQ)) return ((sf != of) || zf);
+   
+    if ((E_icode == IJXX && E_ifun == LESS) || 
+        (E_icode == IRRMOVQ && E_ifun == LESS)) return (sf != of);
+
+    if ((E_icode == IJXX && E_ifun == EQUAL) || 
+        (E_icode == IRRMOVQ && E_ifun == EQUAL)) return (zf);
+
+    if ((E_icode == IJXX && E_ifun == NOTEQUAL) || 
+        (E_icode == IRRMOVQ && E_ifun == NOTEQUAL)) return !(zf);
+
+    if ((E_icode == IJXX && E_ifun == GREATER) || 
+        (E_icode == IRRMOVQ && E_ifun == GREATER)) return (!(sf != of) && !zf);
+
+    if ((E_icode == IJXX && E_ifun == GREATEREQ) || 
+        (E_icode == IRRMOVQ && E_ifun == GREATEREQ)) return !(sf != of);
+     
+    return 0;
+}
    
 uint64_t ExecuteStage::gete_dstE()
 {  

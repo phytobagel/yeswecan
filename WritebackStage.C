@@ -13,7 +13,6 @@
 #include "Status.h"
 #include "Debug.h"
 
-
 /*
  * doClockLow:
  * Performs the Fetch stage combinational logic that is performed when
@@ -29,6 +28,15 @@ bool WritebackStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     W * wreg = (W *) pregs[WREG];
     uint64_t icode = wreg->geticode()->getOutput(); 
     
+   RegisterFile * reg = RegisterFile::getInstance();
+   bool error = false;   
+       
+   uint64_t W_valM = wreg->getvalM()->getOutput();
+   uint64_t W_dstM = wreg->getdstM()->getOutput(); 
+    
+   reg->RegisterFile::writeRegister(W_valM, W_dstM, error);
+
+
     
     if(icode == IHALT)
     {
