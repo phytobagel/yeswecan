@@ -38,18 +38,22 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
             M_stat = SAOK;
 
    uint64_t m_stat = M_stat;
-   
+   m_valM_var = 0;   
    uint64_t address = mem_addr(M_icode, M_valE, M_valA);  
-   uint64_t data_out = 0;
 
    if (mem_read(M_icode))
-       data_out = mem->getLong(address, error); 
+       m_valM_var = mem->getLong(address, error); 
 
    if (mem_write(M_icode))
        mem->putLong(M_valA, address, error);
 
-   setWInput(wreg, m_stat, M_icode, M_valE, data_out, M_dstE, M_dstM);
+   setWInput(wreg, m_stat, M_icode, M_valE, m_valM_var, M_dstE, M_dstM);
    return false;
+}
+
+uint64_t MemoryStage::getm_valM()
+{
+    return m_valM_var;
 }
 
 bool MemoryStage::mem_read(uint64_t M_icode)

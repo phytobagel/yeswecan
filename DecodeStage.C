@@ -14,6 +14,7 @@
 #include "Status.h"
 #include "Debug.h"
 #include "ExecuteStage.h"
+#include "MemoryStage.h"
 
 /*
  * doClockLow:
@@ -63,11 +64,15 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 uint64_t DecodeStage::selFwdA(uint64_t d_srcA, M * mreg, E * ereg, W * wreg, Stage ** stages, uint64_t d_rvalA) 
 {
     ExecuteStage * eStage = (ExecuteStage *) stages[ESTAGE];
+    MemoryStage * mStage = (MemoryStage *) stages[MSTAGE];
 
     if (d_srcA == RNONE) return 0;
 
     if (d_srcA == eStage->gete_dstE())
         return eStage->gete_valE();
+
+    if (d_srcA == mreg->getdstM()->getOutput())
+        return mStage->getm_valM();
 
     if (d_srcA == mreg->getdstE()->getOutput())
         return mreg->getvalE()->getOutput();
@@ -75,20 +80,30 @@ uint64_t DecodeStage::selFwdA(uint64_t d_srcA, M * mreg, E * ereg, W * wreg, Sta
     if (d_srcA == wreg->getdstE()->getOutput())
         return wreg->getvalE()->getOutput();
 
+    if (d_srcA == wreg->getdstM()->getOutput())
+        return wreg->getvalM()->getOutput();
+
     return d_rvalA;
 }
 
 uint64_t DecodeStage::FwdB(uint64_t d_srcB, M * mreg, W * wreg, E * ereg, Stage ** stages, uint64_t d_rvalB )
 {
     ExecuteStage * eStage = (ExecuteStage *) stages[ESTAGE];
+    MemoryStage * mStage = (MemoryStage *) stages[MSTAGE];
 
     if (d_srcB == RNONE) return 0;
 
     if (d_srcB == eStage->gete_dstE())
         return eStage->gete_valE();
 
+    if (d_srcB == mreg->getdstM()->getOutput())
+        return mStage->getm_valM();
+
     if (d_srcB == mreg->getdstE()->getOutput())
         return mreg->getvalE()->getOutput();
+
+    if (d_srcB == wreg->getdstM()->getOutput())
+        return wreg->getvalM()->getOutput();
 
     if (d_srcB == wreg->getdstE()->getOutput())
         return wreg->getvalE()->getOutput();
