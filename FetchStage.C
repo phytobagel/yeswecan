@@ -33,7 +33,7 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    W * wreg = (W *) pregs[WREG];
     
    Memory * mem = Memory::getInstance();
-   bool error = false; 
+   bool mem_error = false; 
    uint64_t icode = 0, ifun = 0, valC = 0, valP = 0;
    uint64_t rA = RNONE, rB = RNONE, stat = SAOK;
 
@@ -45,9 +45,13 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    //written.
    
    uint64_t f_pc = selectPC(freg, mreg, wreg);
-   uint8_t instructionByte = mem->getByte(f_pc, error);
-   icode = Tools::getBits(instructionByte,4,7);
-   ifun = Tools::getBits(instructionByte,0,3); 
+   uint8_t instructionByte = mem->getByte(f_pc, mem_error);
+
+   if (mem_error) icode = INOP;
+   else icode = Tools::getBits(instructionByte,4,7);
+   
+   if (mem_error) ifun = FNONE;
+   else ifun = Tools::getBits(instructionByte,0,3); 
     
    bool needValC = FetchStage::needValC(icode);
    bool needRegIds = FetchStage::needRegIds(icode);
@@ -68,11 +72,38 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
    //The value passed to setInput below will need to be changed
    freg->getpredPC()->setInput(pred_PC);
-   
+  
+   bool instr_valid_var = instr_valid(icode);
+   stat = f_stat(mem_error, instr_valid_var, icode);
    //provide the input values for the D register
    setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
 
    return false;
+}
+
+uint64_t FetchStage::f_stat(bool mem_error, bool instr_valid, uint64_t f_icode)
+{
+    if (mem_error) return SADR;
+    if (!instr_valid) return SINS;
+    if (f_icode == IHALT) return SHLT;
+
+    return SAOK;
+}
+
+bool FetchStage::instr_valid(uint64_t f_icode)
+{
+    return (f_icode == INOP ||
+        f_icode == IHALT ||
+        f_icode == IRRMOVQ ||
+        f_icode == IIRMOVQ || 
+        f_icode == IRMMOVQ ||
+        f_icode == IMRMOVQ ||
+        f_icode == IOPQ ||
+        f_icode == IJXX ||
+        f_icode == ICALL ||
+        f_icode == IRET ||
+        f_icode == IPUSHQ ||
+        f_icode == IPOPQ);
 }
 
 /* doClockHigh

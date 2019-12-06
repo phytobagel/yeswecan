@@ -13,8 +13,8 @@ class FetchStage: public Stage
       uint64_t PCIncrement(bool needValC, bool needRegIds, uint64_t & valP, uint64_t f_pc);
       void getRegIds(uint64_t f_pc, uint64_t & rA, uint64_t & rB);
       uint64_t getValC(uint64_t f_pc);
-
-      
+      uint64_t f_stat(bool mem_error, bool instr_valid, uint64_t f_icode);
+      bool instr_valid(uint64_t f_icode);
 
    public:
       bool doClockLow(PipeReg ** pregs, Stage ** stages);

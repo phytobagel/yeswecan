@@ -35,9 +35,8 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
             M_valA = mreg->getvalA()->getOutput();
    uint64_t M_dstE = mreg->getdstE()->getOutput(),
             M_dstM = mreg->getdstM()->getOutput(),
-            M_stat = SAOK;
+            M_stat = mreg->getstat()->getOutput();
 
-   uint64_t m_stat = M_stat;
    m_valM_var = 0;   
    uint64_t address = mem_addr(M_icode, M_valE, M_valA);  
 
@@ -47,7 +46,10 @@ bool MemoryStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    if (mem_write(M_icode))
        mem->putLong(M_valA, address, error);
 
-   setWInput(wreg, m_stat, M_icode, M_valE, m_valM_var, M_dstE, M_dstM);
+   if (error) m_stat_var = SADR;
+   else m_stat_var = M_stat;
+
+   setWInput(wreg, m_stat_var, M_icode, M_valE, m_valM_var, M_dstE, M_dstM);
    return false;
 }
 
@@ -81,6 +83,11 @@ uint64_t MemoryStage::mem_addr(uint64_t M_icode, uint64_t M_valE, uint64_t M_val
         M_icode == IRET) return M_valA;
 
     return 0;
+}
+
+uint64_t MemoryStage::getm_stat()
+{
+    return m_stat_var;
 }
 
 /* doClockHigh
