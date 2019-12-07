@@ -31,6 +31,8 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    M * mreg = (M *) pregs[MREG];
    D * dreg = (D *) pregs[DREG];
    E * ereg = (E *) pregs[EREG];
+   ExecuteStage * eStage = (ExecuteStage *) stages[ESTAGE];
+   uint64_t e_Cnd = eStage->gete_Cnd();
    uint64_t E_icode = ereg->geticode()->getOutput();
    uint64_t E_dstM = ereg->getdstM()->getOutput();
 
@@ -41,8 +43,8 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
             D_ifun = dreg->getifun()->getOutput(), 
             D_valC = dreg->getvalC()->getOutput(), 
             d_valA = 0, 
-            d_valB = 0;
-            //D_valP = dreg->getvalP()->getOutput();
+            d_valB = 0,
+            D_valP = dreg->getvalP()->getOutput();
    uint64_t d_dstE = RNONE, d_dstM = RNONE, 
             D_stat = dreg->getstat()->getOutput();
 
@@ -55,21 +57,23 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    uint64_t d_rvalB = reg->readRegister(d_srcB,error);
 
    d_valA = selFwdA(d_srcA, mreg, ereg, wreg, stages, d_rvalA);
+   if (D_icode == ICALL || D_icode == IJXX) d_valA = D_valP;
    d_valB = FwdB(d_srcB, mreg, wreg, ereg, stages, d_rvalB);
 
-   E_bubble = calcE_bubble(E_icode, E_dstM);
+   E_bubble = calcE_bubble(E_icode, E_dstM, e_Cnd);
    //provide the input values for the D register
    setEInput(ereg, D_stat, D_icode, D_ifun, D_valC, d_valA, 
              d_valB, d_dstE, d_dstM, d_srcA, d_srcB);
    return false;
 }
 
-bool DecodeStage::calcE_bubble(uint64_t E_icode, uint64_t E_dstM)
+bool DecodeStage::calcE_bubble(uint64_t E_icode, uint64_t E_dstM, uint64_t e_Cnd)
 {
-    return (E_icode == IMRMOVQ ||
+    return (E_icode == IJXX && !e_Cnd) ||
+          ((E_icode == IMRMOVQ ||
             E_icode == IPOPQ) &&
            (E_dstM == d_srcA ||
-            E_dstM == d_srcB);
+            E_dstM == d_srcB));
 }
 
 uint64_t DecodeStage::getd_srcA()

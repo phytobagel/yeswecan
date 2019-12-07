@@ -17,9 +17,10 @@ class FetchStage: public Stage
       bool instr_valid(uint64_t f_icode);
       bool F_stall;
       bool D_stall;
-      bool calcF_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB);
-      bool calcD_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB);
-
+      bool calcF_stall(PipeReg ** pregs, uint64_t d_srcA, uint64_t d_srcB);
+      bool calcD_stall(PipeReg ** pregs, uint64_t d_srcA, uint64_t d_srcB);
+      bool D_bubble;
+      bool calcD_bubble(PipeReg ** pregs, uint64_t e_Cnd, uint64_t d_srcA, uint64_t d_srcB);
 
    public:
       bool doClockLow(PipeReg ** pregs, Stage ** stages);

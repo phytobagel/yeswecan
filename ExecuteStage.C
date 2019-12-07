@@ -33,8 +33,7 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    W * wreg = (W *) pregs[WREG];
 
    uint64_t E_icode = ereg->geticode()->getOutput(), 
-            E_ifun = ereg->getifun()->getOutput(),
-            e_Cnd = 0, 
+            E_ifun = ereg->getifun()->getOutput(), 
             E_valA = ereg->getvalA()->getOutput(),
             E_valB = ereg->getvalB()->getOutput(),
             E_valC = ereg->getvalC()->getOutput(),
@@ -61,6 +60,11 @@ bool ExecuteStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    setMInput(mreg, E_stat, E_icode, e_Cnd, ALUoutput, E_valA, e_dstE_var, E_dstM);
    return false;
 } 
+
+uint64_t ExecuteStage::gete_Cnd()
+{
+    return e_Cnd;
+}
 
 uint64_t ExecuteStage::cond(uint64_t E_icode, uint64_t E_ifun)
 {
