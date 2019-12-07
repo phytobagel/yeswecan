@@ -19,7 +19,7 @@ RegisterFile.h ConditionCodes.h
 PipeRegField.o: PipeRegField.h
 
 FetchStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h Stage.h \
-	FetchStage.h Status.h Debug.h Instructions.h Memory.h
+	FetchStage.h Status.h Debug.h Instructions.h Memory.h E.h DecodeStage.h
 
 DecodeStage.o: RegisterFile.h PipeRegField.h PipeReg.h F.h D.h M.h W.h Stage.h \
 DecodeStage.h Status.h Debug.h E.h

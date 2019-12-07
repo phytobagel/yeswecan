@@ -14,9 +14,13 @@ class DecodeStage: public Stage
       uint64_t getDstM(uint64_t D_icode, uint64_t D_rA);
       uint64_t selFwdA(uint64_t d_srcA, M * mreg, E * ereg, W * wreg, Stage ** stages, uint64_t d_rvalA)  ;
       uint64_t FwdB(uint64_t d_srcB, M * mreg, W * wreg, E * ereg, Stage ** stages, uint64_t d_rvalB);
-
+      uint64_t d_srcA;
+      uint64_t d_srcB;
+      
    public:
       bool doClockLow(PipeReg ** pregs, Stage ** stages);
       void doClockHigh(PipeReg ** pregs);
+      uint64_t getd_srcB();
+      uint64_t getd_srcA();
 
 };

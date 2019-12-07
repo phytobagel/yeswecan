@@ -15,9 +15,15 @@ class FetchStage: public Stage
       uint64_t getValC(uint64_t f_pc);
       uint64_t f_stat(bool mem_error, bool instr_valid, uint64_t f_icode);
       bool instr_valid(uint64_t f_icode);
+      bool F_stall;
+      bool D_stall;
+      bool calcF_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB);
+      bool calcD_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB);
+
 
    public:
       bool doClockLow(PipeReg ** pregs, Stage ** stages);
       void doClockHigh(PipeReg ** pregs);
+
 
 };

@@ -41,8 +41,7 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
             d_valB = 0;
             //D_valP = dreg->getvalP()->getOutput();
    uint64_t d_dstE = RNONE, d_dstM = RNONE, 
-            D_stat = dreg->getstat()->getOutput(),
-            d_srcA = RNONE, d_srcB = RNONE;
+            D_stat = dreg->getstat()->getOutput();
 
    d_srcA = getSrcA(D_icode,dreg->getrA()->getOutput());
    d_srcB = getSrcB(D_icode,dreg->getrB()->getOutput());
@@ -59,6 +58,16 @@ bool DecodeStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    setEInput(ereg, D_stat, D_icode, D_ifun, D_valC, d_valA, 
              d_valB, d_dstE, d_dstM, d_srcA, d_srcB);
    return false;
+}
+
+uint64_t DecodeStage::getd_srcA()
+{
+    return d_srcA;
+}
+
+uint64_t DecodeStage::getd_srcB()
+{
+    return d_srcB;
 }
 
 uint64_t DecodeStage::selFwdA(uint64_t d_srcA, M * mreg, E * ereg, W * wreg, Stage ** stages, uint64_t d_rvalA) 

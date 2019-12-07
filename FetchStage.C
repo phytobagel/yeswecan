@@ -15,6 +15,9 @@
 #include "Debug.h"
 #include "iostream"
 #include "Instructions.h"
+#include "E.h"
+#include "DecodeStage.h"
+
 
 /*
  * doClockLow:
@@ -29,8 +32,14 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 {
    F * freg = (F *) pregs[FREG];
    D * dreg = (D *) pregs[DREG];
+   E * ereg = (E *) pregs[EREG];
    M * mreg = (M *) pregs[MREG];
    W * wreg = (W *) pregs[WREG];
+   DecodeStage * dStage = (DecodeStage *) stages[DSTAGE];
+   uint64_t d_srcA = dStage->getd_srcA();
+   uint64_t d_srcB = dStage->getd_srcB();
+   uint64_t E_icode = ereg->geticode()->getOutput();
+   uint64_t E_dstM = ereg->getdstM()->getOutput();
     
    Memory * mem = Memory::getInstance();
    bool mem_error = false; 
@@ -72,13 +81,32 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
 
    //The value passed to setInput below will need to be changed
    freg->getpredPC()->setInput(pred_PC);
-  
+
+   F_stall = calcF_stall(E_icode, E_dstM, d_srcA, d_srcB);
+   D_stall = false;
+     
    bool instr_valid_var = instr_valid(icode);
    stat = f_stat(mem_error, instr_valid_var, icode);
    //provide the input values for the D register
    setDInput(dreg, stat, icode, ifun, rA, rB, valC, valP);
 
    return false;
+}
+
+bool FetchStage::calcD_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB)
+{
+    return (E_icode == IMRMOVQ ||
+            E_icode == IPOPQ) &&
+           (E_dstM == d_srcA ||
+            E_dstM == d_srcB);
+}
+
+bool FetchStage::calcF_stall(uint64_t E_icode, uint64_t E_dstM, uint64_t d_srcA, uint64_t d_srcB)
+{
+    return (E_icode == IMRMOVQ ||
+            E_icode == IPOPQ) &&
+           (E_dstM == d_srcA ||
+            E_dstM == d_srcB);
 }
 
 uint64_t FetchStage::f_stat(bool mem_error, bool instr_valid, uint64_t f_icode)
