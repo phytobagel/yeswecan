@@ -43,15 +43,9 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
     
    Memory * mem = Memory::getInstance();
    bool mem_error = false; 
+
    uint64_t icode = 0, ifun = 0, valC = 0, valP = 0;
    uint64_t rA = RNONE, rB = RNONE, stat = SAOK;
-
-   //code missing here to select the value of the PC
-   //and fetch the instruction from memory
-   //Fetching the instruction will allow the icode, ifun,
-   //rA, rB, and valC to be set.
-   //The lab assignment describes what methods need to be
-   //written.
    
    uint64_t f_pc = selectPC(freg, mreg, wreg);
    uint8_t instructionByte = mem->getByte(f_pc, mem_error);
@@ -79,11 +73,11 @@ bool FetchStage::doClockLow(PipeReg ** pregs, Stage ** stages)
    valP = PCIncrement(needValC, needRegIds, valP, f_pc);
    uint64_t pred_PC = predictPC(valP, valC, icode);
 
-   //The value passed to setInput below will need to be changed
+   
    freg->getpredPC()->setInput(pred_PC);
 
    F_stall = calcF_stall(E_icode, E_dstM, d_srcA, d_srcB);
-   D_stall = false;
+   D_stall = calcD_stall(E_icode, E_dstM, d_srcA, d_srcB);
      
    bool instr_valid_var = instr_valid(icode);
    stat = f_stat(mem_error, instr_valid_var, icode);
@@ -145,7 +139,10 @@ void FetchStage::doClockHigh(PipeReg ** pregs)
    F * freg = (F *) pregs[FREG];
    D * dreg = (D *) pregs[DREG];
 
-   freg->getpredPC()->normal();
+   if (!F_stall) freg->getpredPC()->normal();
+   
+   if (!D_stall)
+   {
    dreg->getstat()->normal();
    dreg->geticode()->normal();
    dreg->getifun()->normal();
@@ -153,6 +150,7 @@ void FetchStage::doClockHigh(PipeReg ** pregs)
    dreg->getrB()->normal();
    dreg->getvalC()->normal();
    dreg->getvalP()->normal();
+   }
 }
 
 /* setDInput
