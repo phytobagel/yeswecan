@@ -1,0 +1,36 @@
+0x000:                      |          .pos 0
+0x000: 30f40002000000000000 |          irmovq stack, %rsp
+0x00a: 30f76800000000000000 |          irmovq list, %rdi
+0x014: 801e00000000000000   |          call addList
+0x01d: 00                   |          halt
+                            | #
+                            | # addList: sum the elements of a NULL terminated list
+                            | # parameter: %rdi contains the value list, which
+                            | #            is the adress of the first element in the list
+                            | # return: %rax contains the sum
+0x01e:                      | addList: 
+0x01e: 30f60000000000000000 |          irmovq $0, %rsi
+0x028: 30f10800000000000000 |          irmovq $8, %rcx
+0x032: 30f80100000000000000 |          irmovq $1, %r8
+                            | 
+0x03c: 50270000000000000000 | top:     mrmovq (%rdi), %rdx
+0x046: 6222                 |          andq %rdx, %rdx 
+0x048: 735e00000000000000   |          je done
+0x051: 6086                 |          addq %r8, %rsi
+0x053: 6017                 |          addq %rcx, %rdi
+0x055: 703c00000000000000   |          jmp top
+                            | 
+0x05e: 2060                 | done:    rrmovq %rsi, %rax
+0x060: 90                   |          ret  
+0x068:                      |          .align 8
+0x068: 0200000000000000     | list:    .quad 2
+0x070: 0500000000000000     |          .quad 5
+0x078: ffffffffffffffff     |          .quad -1 
+0x080: 0100000000000000     |          .quad 1
+0x088: 0200000000000000     |          .quad 2
+0x090: 0400000000000000     |          .quad 4
+0x098: 0500000000000000     |          .quad 5
+0x0a0: 0000000000000000     |          .quad 0  #indicates the end of the list
+                            | #
+0x200:                      |          .pos 0x200
+0x200:                      | stack:

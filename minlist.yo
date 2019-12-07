@@ -1,0 +1,38 @@
+0x000:                      |          .pos 0
+0x000: 30f40002000000000000 |          irmovq stack, %rsp
+0x00a: 30f76000000000000000 |          irmovq list, %rdi
+0x014: 801e00000000000000   |          call minList
+0x01d: 00                   |          halt
+                            | #
+                            | # minList: return the minimum value of the elements of a NULL terminated list
+                            | # parameter: %rdi contains the value list, which
+                            | #            is the adress of the first element in the list
+                            | # return: %rax contains the minimum value in the list
+0x01e: 30f10800000000000000 | minList: irmovq $8, %rcx 
+0x028: 50270000000000000000 |          mrmovq (%rdi), %rdx
+                            | 
+                            | 
+0x032: 50870000000000000000 | top:     mrmovq (%rdi), %r8 
+0x03c: 6288                 |          andq %r8, %r8
+0x03e: 735800000000000000   |          je done
+0x047: 2029                 |          rrmovq %rdx, %r9 
+0x049: 6189                 |          subq %r8, %r9    
+0x04b: 2582                 |          cmovge %r8, %rdx
+0x04d: 6017                 |          addq %rcx, %rdi
+                            |                            #
+0x04f: 703200000000000000   |          jmp top      
+                            | 
+0x058: 2020                 | done:    rrmovq %rdx, %rax
+0x05a: 90                   |          ret  
+0x060:                      |          .align 8
+0x060: 1600000000000000     | list:    .quad 22
+0x068: 3500000000000000     |          .quad 53
+0x070: f9ffffffffffffff     |          .quad -7 
+0x078: 0100000000000000     |          .quad 1
+0x080: feffffffffffffff     |          .quad -2
+0x088: 2a00000000000000     |          .quad 42
+0x090: fbffffffffffffff     |          .quad -5
+0x098: 0000000000000000     |          .quad 0  #indicates the end of the list
+                            | #
+0x200:                      |          .pos 0x200
+0x200:                      | stack:

@@ -1,0 +1,59 @@
+                            | # This program calls a minBST function that returns the minimum value
+                            | # in a binary search tree.  The parameter to minBST is in %rdi. 
+                            | # %rdi contains the address of the root node. The return value is
+                            | # stored in %rax. A node consists of three 8-byte fields: address
+                            | # of left child, address of right child, value of node.
+0x000:                      |        .pos 0
+0x000: 30f40002000000000000 |        irmovq stack, %rsp
+0x00a: 30f77800000000000000 |        irmovq node0, %rdi
+0x014: 30f01e00000000000000 |        irmovq 30, %rax 
+0x01e: 802800000000000000   |        call minBST
+0x027: 00                   |        halt   
+0x028:                      | minBST: #address of root node is in %rdi
+                            |         #returns the minimum value in the tree in register %rax
+0x028: 30f81000000000000000 |        irmovq $16, %r8 
+                            |        
+                            | 
+0x032:                      | top:   
+0x032: 2073                 |        rrmovq %rdi, %rbx
+0x034: 6083                 |        addq %r8, %rbx
+0x036: 50130000000000000000 |        mrmovq (%rbx), %rcx
+0x040: 200b                 |        rrmovq %rax, %r11
+0x042: 201c                 |        rrmovq %rcx, %r12
+0x044: 61bc                 |        subq %r11, %r12
+0x046: 2210                 |        cmovl %rcx, %rax
+                            | 
+0x048: 50970000000000000000 |        mrmovq (%rdi), %r9
+0x052: 6299                 |        andq %r9, %r9
+0x054: 737000000000000000   |        je done
+0x05d: 50770000000000000000 |        mrmovq (%rdi), %rdi
+0x067: 703200000000000000   |        jmp top
+                            | 
+0x070: 90                   | done:  ret
+                            | #
+                            | 
+                            | 
+                            | 
+                            | 
+                            | 
+0x078:                      |        .align 8
+0x078: 9000000000000000     | node0: .quad node1    #address of left child
+0x080: a800000000000000     |        .quad node2    #address of right child
+0x088: 0a00000000000000     |        .quad 10       #value in the node
+0x090: c000000000000000     | node1: .quad node3
+0x098: 0000000000000000     |        .quad 0
+0x0a0: 0400000000000000     |        .quad 4        
+0x0a8: d800000000000000     | node2: .quad node4
+0x0b0: f000000000000000     |        .quad node5
+0x0b8: 0c00000000000000     |        .quad 12
+0x0c0: 0000000000000000     | node3: .quad 0
+0x0c8: 0000000000000000     |        .quad 0
+0x0d0: 0200000000000000     |        .quad 2        #here is the minimum value
+0x0d8: 0000000000000000     | node4: .quad 0
+0x0e0: 0000000000000000     |        .quad 0
+0x0e8: 0b00000000000000     |        .quad 11
+0x0f0: 0000000000000000     | node5: .quad 0
+0x0f8: 0000000000000000     |        .quad 0
+0x100: 0f00000000000000     |        .quad 15
+0x200:                      |        .pos 0x200
+0x200: 0000000000000000     | stack: .quad 0
